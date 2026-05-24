@@ -165,21 +165,21 @@ $nik2 = NIK::set(3273012501990001);    // integer
 
 | Operation | Time | Memory |
 |-----------|------|--------|
-| NIK Creation | ~1.0ms | ~774KB |
-| NIK Parsing | ~0.03ms | ~4KB |
-| KK Creation | ~0.8ms | ~803KB |
-| KK Parsing | ~0.01ms | ~1KB |
-| NIK Generation | ~0.2ms | ~48B |
+| NIK Creation | ~1.1ms | ~785KB |
+| NIK Parsing | ~0.03ms | ~69KB |
+| KK Creation | ~0.1ms | ~16KB |
+| KK Parsing | <0.01ms | ~1KB |
+| NIK Generation | ~0.05ms | ~48B |
 | KK Generation | ~0.01ms | ~48B |
-| 1000 NIK Operations | ~10.6ms | Optimized |
-| 1000 KK Operations | ~10.3ms | Optimized |
+| 1000 NIK Operations | ~3.1ms | Optimized |
+| 1000 KK Operations | ~1.3ms | Optimized |
 
 ## 🧪 Testing
 
 Run the comprehensive test suite:
 
 ```bash
-./vendor/bin/phpunit
+composer test
 ```
 
 All 63 tests pass with 100% coverage.
@@ -187,7 +187,7 @@ All 63 tests pass with 100% coverage.
 ## 📁 Project Structure
 
 ```
-number-validator/
+identika/
 ├── src/
 │   ├── Base.php          # Abstract base class with optimizations
 │   ├── NIK.php           # NIK validator with caching
@@ -197,7 +197,8 @@ number-validator/
 ├── tests/
 │   ├── BaseTest.php      # Base class tests
 │   ├── NIKTest.php       # NIK validation tests
-│   └── KKTest.php        # KK validation tests
+│   ├── KKTest.php        # KK validation tests
+│   └── TestCase.php      # Test base class
 ├── example.php           # Performance demonstration
 └── composer.json         # Dependencies
 ```

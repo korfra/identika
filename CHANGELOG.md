@@ -5,6 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Planned
+- Additional validation rules
+- More comprehensive error messages
+- Performance monitoring tools
+- Extended documentation
+
+## [2.0.0] - 2026-05-24
+
+### Added
+- **Identity Generation**: Added `NIK::generate()` and `KK::generate()` for high-performance random identity number generation
+- **Localized Generation**: Support for generating NIK/KK based on specific provinces and genders
+- **Comprehensive Benchmarks**: Added performance demonstration for generation features
+
+### Changed
+- **Performance Optimizations**: Further refined string operations and caching for faster processing
+
+### Removed
+- **Zodiac Calculation**: Removed zodiac calculation from NIK results to focus on core identity data and performance
+
+### Technical Enhancements
+- **Static Methods**: Modernized helper methods for utility access
+- **Memory Efficiency**: Reduced overhead during bulk generation operations
+
+### Breaking Changes
+- **Namespace Migration**: Migrated from `Turahe\Validator` to `Korfra\Identika` namespace
+- **Zodiac Removal**: The `zodiac` property is no longer available in the NIK parse result
+
+### Migration Guide
+- Update your `use` statements from `Turahe\Validator\*` to `Korfra\Identika\*`
+- Remove any logic that relies on the `zodiac` property from NIK parse results
+
 ## [1.0.0] - 2024-12-19
 
 ### Added
@@ -60,11 +93,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update PHP to version 8.4 or higher
 - Review method signatures for type changes
 - Update any custom implementations to match new interfaces
-
-## [Unreleased]
-
-### Planned
-- Additional validation rules
-- More comprehensive error messages
-- Performance monitoring tools
-- Extended documentation
