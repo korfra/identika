@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator;
+namespace Korfra\Identika;
 
 /**
  * Base class for number validation with optimized performance.
@@ -18,6 +18,11 @@ abstract class Base
      * The number to validate.
      */
     public readonly string $number;
+
+    /**
+     * Static cache for location data to optimize static methods.
+     */
+    protected static ?array $cachedLocationData = null;
 
     /**
      * Cached values for performance.
@@ -42,6 +47,12 @@ abstract class Base
         // Optimized file loading with error handling
         $wilayahPath ??= dirname(__FILE__) . '/assets/wilayah.json';
 
+        if (null !== self::$cachedLocationData) {
+            $this->location = self::$cachedLocationData;
+
+            return;
+        }
+
         if (! file_exists($wilayahPath)) {
             throw new \InvalidArgumentException("Wilayah file not found: $wilayahPath");
         }
@@ -52,7 +63,7 @@ abstract class Base
             throw new \RuntimeException("Failed to read wilayah file: $wilayahPath");
         }
 
-        $this->location = json_decode($jsonContent, true, 512, JSON_THROW_ON_ERROR) ?? [];
+        $this->location = self::$cachedLocationData = json_decode($jsonContent, true, 512, JSON_THROW_ON_ERROR) ?? [];
     }
 
     /**
@@ -162,64 +173,6 @@ abstract class Base
     }
 
     /**
-     * Get zodiac from born date (optimized with early return).
-     */
-    public function getZodiac(): string
-    {
-        $bornDate = $this->getBornDate();
-        $month = (int) $bornDate->month;
-        $date = (int) $bornDate->date;
-
-        // Optimized zodiac calculation with early returns
-        if (1 === $month) {
-            return 20 <= $date ? 'Aquarius' : 'Capricorn';
-        }
-
-        if (2 === $month) {
-            return 19 <= $date ? 'Pisces' : 'Aquarius';
-        }
-
-        if (3 === $month) {
-            return 21 <= $date ? 'Aries' : 'Pisces';
-        }
-
-        if (4 === $month) {
-            return 20 <= $date ? 'Taurus' : 'Aries';
-        }
-
-        if (5 === $month) {
-            return 21 <= $date ? 'Gemini' : 'Taurus';
-        }
-
-        if (6 === $month) {
-            return 21 <= $date ? 'Cancer' : 'Gemini';
-        }
-
-        if (7 === $month) {
-            return 23 <= $date ? 'Leo' : 'Cancer';
-        }
-
-        if (8 === $month) {
-            return 23 <= $date ? 'Virgo' : 'Leo';
-        }
-
-        if (9 === $month) {
-            return 23 <= $date ? 'Libra' : 'Virgo';
-        }
-
-        if (10 === $month) {
-            return 24 <= $date ? 'Scorpio' : 'Libra';
-        }
-
-        if (11 === $month) {
-            return 23 <= $date ? 'Sagittarius' : 'Scorpio';
-        }
-
-        // December
-        return 22 <= $date ? 'Capricorn' : 'Sagittarius';
-    }
-
-    /**
      * Get the province from NIK (optimized with direct access).
      */
     public function getProvince(): ?string
@@ -245,7 +198,7 @@ abstract class Base
     public function getSubDistrict(): ?string
     {
         $subDistrictCode = $this->number[0] . $this->number[1] . $this->number[2] .
-                           $this->number[3] . $this->number[4] . $this->number[5];
+            $this->number[3] . $this->number[4] . $this->number[5];
 
         $result = $this->location['kecamatan'][$subDistrictCode] ?? null;
 
@@ -264,7 +217,7 @@ abstract class Base
     public function getPostalCode(): ?string
     {
         $subDistrictCode = $this->number[0] . $this->number[1] . $this->number[2] .
-                           $this->number[3] . $this->number[4] . $this->number[5];
+            $this->number[3] . $this->number[4] . $this->number[5];
 
         $result = $this->location['kecamatan'][$subDistrictCode] ?? null;
 
@@ -300,5 +253,49 @@ abstract class Base
         $this->cachedAge = null;
         $this->cachedNextBirthday = null;
         $this->cachedGender = null;
+    }
+
+    /**
+     * Get a random location code from the available kecamatan data.
+     */
+    protected static function getRandomLocationCode(?string $prefix = null, ?string $wilayahPath = null): string
+    {
+        $kecamatan = self::getKecamatanCodes($prefix, $wilayahPath);
+
+        return (string) $kecamatan[array_rand($kecamatan)];
+    }
+
+    /**
+     * Get all kecamatan codes, optionally filtered by prefix.
+     */
+    protected static function getKecamatanCodes(?string $prefix = null, ?string $wilayahPath = null): array
+    {
+        if (null === self::$cachedLocationData) {
+            $wilayahPath ??= dirname(__FILE__) . '/assets/wilayah.json';
+
+            if (! file_exists($wilayahPath)) {
+                throw new \InvalidArgumentException("Wilayah file not found: $wilayahPath");
+            }
+
+            $jsonContent = file_get_contents($wilayahPath);
+
+            if (false === $jsonContent) {
+                throw new \RuntimeException("Failed to read wilayah file: $wilayahPath");
+            }
+
+            self::$cachedLocationData = json_decode($jsonContent, true, 512, JSON_THROW_ON_ERROR);
+        }
+
+        $kecamatan = array_keys(self::$cachedLocationData['kecamatan'] ?? []);
+
+        if (null !== $prefix) {
+            $kecamatan = array_filter($kecamatan, static fn ($code) => str_starts_with((string) $code, $prefix));
+        }
+
+        if (empty($kecamatan)) {
+            throw new \RuntimeException('No kecamatan data found for the given criteria');
+        }
+
+        return array_values($kecamatan);
     }
 }

@@ -2,33 +2,19 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator\Tests;
+namespace Korfra\Identika\Tests;
 
+use Korfra\Identika\Base;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Turahe\Validator\Base;
 
 /**
  * @small
  */
+#[CoversClass(Base::class)]
 class BaseTest extends TestCase
 {
     private const TEST_NUMBER = '3273012501990001';
-
-    // Concrete implementation of Base for testing
-    private static function createTestBase(string $number): Base
-    {
-        return new class($number) extends Base {
-            public function parse(): object
-            {
-                return (object) ['valid' => true];
-            }
-
-            public function validate(): bool
-            {
-                return true;
-            }
-        };
-    }
 
     public function testConstructor(): void
     {
@@ -48,7 +34,7 @@ class BaseTest extends TestCase
         $this->assertLessThanOrEqual(99, $currentYear);
     }
 
-    public function testGetNIKYear(): void
+    public function testGetNikYear(): void
     {
         $base = self::createTestBase(self::TEST_NUMBER);
         $nikYear = $base->getNIKYear();
@@ -57,7 +43,7 @@ class BaseTest extends TestCase
         $this->assertSame(99, $nikYear); // From TEST_NUMBER: 3273012501990001
     }
 
-    public function testGetNIKDate(): void
+    public function testGetNikDate(): void
     {
         $base = self::createTestBase(self::TEST_NUMBER);
         $nikDate = $base->getNIKDate();
@@ -141,18 +127,6 @@ class BaseTest extends TestCase
         $this->assertGreaterThanOrEqual(0, $nextBirthday->day);
     }
 
-    public function testGetZodiac(): void
-    {
-        $base = self::createTestBase(self::TEST_NUMBER);
-        $zodiac = $base->getZodiac();
-
-        $this->assertIsString($zodiac);
-        $this->assertNotEmpty($zodiac);
-
-        // For January 25th, should be Aquarius
-        $this->assertSame('Aquarius', $zodiac);
-    }
-
     public function testGetProvince(): void
     {
         $base = self::createTestBase(self::TEST_NUMBER);
@@ -214,5 +188,21 @@ class BaseTest extends TestCase
         $this->assertNull($base->getProvince());
         $this->assertNull($base->getCity());
         $this->assertNull($base->getSubDistrict());
+    }
+
+    // Concrete implementation of Base for testing
+    private static function createTestBase(string $number): Base
+    {
+        return new class($number) extends Base {
+            public function parse(): object
+            {
+                return (object) ['valid' => true];
+            }
+
+            public function validate(): bool
+            {
+                return true;
+            }
+        };
     }
 }

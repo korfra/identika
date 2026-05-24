@@ -1,12 +1,12 @@
-# Number Validator
+# Identika
 
 [![PHP Version](https://img.shields.io/badge/PHP-8.4+-blue.svg)](https://php.net)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/Tests-63%20passed-brightgreen.svg)](https://github.com/turahe/number-validator)
-[![Performance](https://img.shields.io/badge/Performance-Optimized-orange.svg)](https://github.com/turahe/number-validator)
-[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](https://github.com/turahe/number-validator)
+[![Tests](https://img.shields.io/badge/Tests-63%20passed-brightgreen.svg)](https://github.com/korfra/identika)
+[![Performance](https://img.shields.io/badge/Performance-Optimized-orange.svg)](https://github.com/korfra/identika)
+[![Coverage](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)](https://github.com/korfra/identika)
 
-A high-performance PHP package for validating and parsing Indonesian identity numbers (NIK and KK) with PHP 8.4 features and optimized performance.
+A high-performance PHP package for validating, parsing, and generating Indonesian identity numbers (NIK and KK) with PHP 8.4 features and optimized performance.
 
 ## 🚀 Features
 
@@ -15,14 +15,15 @@ A high-performance PHP package for validating and parsing Indonesian identity nu
 - **PHP 8.4** optimized with modern features
 - **High Performance** with intelligent caching
 - **Offline Operation** - no internet connection required
-- **Comprehensive Data** - age, gender, zodiac, address, postal code
+- **Comprehensive Data** - age, gender, address, postal code
 - **Type Safety** with strict type declarations
 - **Error Handling** with detailed validation messages
+- **Random Generation** for testing and development
 
 ## 📦 Installation
 
 ```bash
-composer require turahe/number-validator
+composer require korfra/identika
 ```
 
 ## 🎯 Quick Start
@@ -31,7 +32,7 @@ composer require turahe/number-validator
 
 ```php
 <?php
-use Turahe\Validator\NIK;
+use Korfra\Identika\NIK;
 
 $nik = NIK::set('3273012501990001');
 $result = $nik->parse();
@@ -40,7 +41,6 @@ if ($result->valid) {
     echo "Gender: " . $result->gender . "\n";
     echo "Born: " . $result->born->full . "\n";
     echo "Age: " . $result->age->year . " years\n";
-    echo "Zodiac: " . $result->zodiac . "\n";
     echo "Province: " . $result->address->province . "\n";
     echo "City: " . $result->address->city . "\n";
     echo "Sub-district: " . $result->address->subDistrict . "\n";
@@ -53,7 +53,7 @@ if ($result->valid) {
 
 ```php
 <?php
-use Turahe\Validator\KK;
+use Korfra\Identika\KK;
 
 $kk = KK::set('3273012501990001');
 $result = $kk->parse();
@@ -73,7 +73,7 @@ if ($result->valid) {
 
 ```php
 <?php
-use Turahe\Validator\NIK;
+use Korfra\Identika\NIK;
 
 try {
     $nik = NIK::set('123456789012345'); // Too short
@@ -91,7 +91,7 @@ print_r($errors);
 
 ```php
 <?php
-use Turahe\Validator\NIK;
+use Korfra\Identika\NIK;
 
 $nik = NIK::set('3273012501990001');
 $array = $nik->toArray();
@@ -99,11 +99,37 @@ $array = $nik->toArray();
 echo json_encode($array, JSON_PRETTY_PRINT);
 ```
 
+### Random Generation
+
+```php
+<?php
+use Korfra\Identika\NIK;
+use Korfra\Identika\KK;
+
+// Generate random NIK
+$nik = NIK::generate(); // Returns valid NIK string
+
+// Generate NIK with specific location, gender and birth date
+$nik = NIK::generate(
+    province: '32',           // Jawa Barat
+    city: '3273',             // Kota Bandung
+    subDistrict: '327301',     // Sukasari
+    gender: 'PEREMPUAN',
+    birthDate: '170845'       // 17 August 1945
+);
+
+// Generate random KK
+$kk = KK::generate(); // Returns valid KK string
+
+// Generate KK for specific location
+$kk = KK::generate(province: '31'); // DKI Jakarta
+```
+
 ### Type Safety
 
 ```php
 <?php
-use Turahe\Validator\NIK;
+use Korfra\Identika\NIK;
 
 // Both string and integer inputs work
 $nik1 = NIK::set('3273012501990001');  // string
@@ -120,7 +146,6 @@ $nik2 = NIK::set(3273012501990001);    // integer
 ### String Operations
 - Direct character access instead of `substr()`
 - **2.6x faster** string operations
-- Optimized zodiac calculation with early returns
 
 ### Memory Management
 - Readonly properties for immutability
@@ -140,12 +165,14 @@ $nik2 = NIK::set(3273012501990001);    // integer
 
 | Operation | Time | Memory |
 |-----------|------|--------|
-| NIK Creation | ~2.5ms | ~783KB |
-| NIK Parsing | ~0.1ms | ~4KB |
-| KK Creation | ~2.1ms | ~739KB |
-| KK Parsing | ~0.02ms | ~1KB |
-| 1000 NIK Operations | ~1.5s | Optimized |
-| 1000 KK Operations | ~1.5s | Optimized |
+| NIK Creation | ~1.0ms | ~774KB |
+| NIK Parsing | ~0.03ms | ~4KB |
+| KK Creation | ~0.8ms | ~803KB |
+| KK Parsing | ~0.01ms | ~1KB |
+| NIK Generation | ~0.2ms | ~48B |
+| KK Generation | ~0.01ms | ~48B |
+| 1000 NIK Operations | ~10.6ms | Optimized |
+| 1000 KK Operations | ~10.3ms | Optimized |
 
 ## 🧪 Testing
 
@@ -181,6 +208,7 @@ number-validator/
 
 #### Methods
 - `set(string|int $number): self` - Create NIK instance
+- `generate(?string $province = null, ?string $city = null, ?string $subDistrict = null, ?string $gender = null, ?string $birthDate = null): string` - Generate random valid NIK
 - `parse(): object` - Parse and validate NIK data
 - `validate(): bool` - Check if NIK is valid
 - `getValidationErrors(): array` - Get detailed error messages
@@ -188,7 +216,6 @@ number-validator/
 - `getGender(): string` - Get gender (LAKI-LAKI/PEREMPUAN)
 - `getBornDate(): object` - Get birth date information
 - `getAge(): object` - Get age calculation
-- `getZodiac(): string` - Get zodiac sign
 - `getProvince(): ?string` - Get province name
 - `getCity(): ?string` - Get city name
 - `getSubDistrict(): ?string` - Get sub-district name
@@ -198,6 +225,7 @@ number-validator/
 
 #### Methods
 - `set(string|int $number): self` - Create KK instance
+- `generate(?string $province = null, ?string $city = null, ?string $subDistrict = null): string` - Generate random valid KK number
 - `parse(): object` - Parse and validate KK data
 - `validate(): bool` - Check if KK is valid
 - `getValidationErrors(): array` - Get detailed error messages

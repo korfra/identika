@@ -2,14 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator\Tests;
+namespace Korfra\Identika\Tests;
 
+use Korfra\Identika\KK;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Turahe\Validator\KK;
 
 /**
  * @small
  */
+#[CoversClass(KK::class)]
 class KKTest extends TestCase
 {
     private const VALID_KK = '3273012501990001';
@@ -32,21 +34,21 @@ class KKTest extends TestCase
         $this->assertSame('3273012501990001', $kk->number);
     }
 
-    public function testValidateWithValidKK(): void
+    public function testValidateWithValidKk(): void
     {
         $kk = KK::set(self::VALID_KK);
 
         $this->assertTrue($kk->validate());
     }
 
-    public function testValidateWithInvalidKK(): void
+    public function testValidateWithInvalidKk(): void
     {
         $kk = KK::set(self::INVALID_KK);
 
         $this->assertFalse($kk->validate());
     }
 
-    public function testParseWithValidKK(): void
+    public function testParseWithValidKk(): void
     {
         $kk = KK::set(self::VALID_KK);
         $result = $kk->parse();
@@ -58,7 +60,7 @@ class KKTest extends TestCase
         $this->assertIsString($result->postalCode);
     }
 
-    public function testParseWithInvalidKK(): void
+    public function testParseWithInvalidKk(): void
     {
         $kk = KK::set(self::INVALID_KK);
         $result = $kk->parse();
@@ -146,19 +148,30 @@ class KKTest extends TestCase
         $this->assertIsString($result->address->subDistrict);
     }
 
-    public function testInvalidKKWithShortLength(): void
+    public function testGenerate(): void
+    {
+        $kkString = KK::generate();
+
+        $this->assertSame(16, strlen($kkString));
+        $this->assertTrue(ctype_digit($kkString));
+
+        $kk = KK::set($kkString);
+        $this->assertTrue($kk->validate());
+    }
+
+    public function testInvalidKkWithShortLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         KK::set('123456789012345');
     }
 
-    public function testInvalidKKWithLongLength(): void
+    public function testInvalidKkWithLongLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         KK::set('12345678901234567');
     }
 
-    public function testInvalidKKWithNonNumeric(): void
+    public function testInvalidKkWithNonNumeric(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         KK::set('123456789012345a');

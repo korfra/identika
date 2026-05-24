@@ -1,20 +1,39 @@
 {
-	"name": "turahe/number-validator",
-	"description": "identification number validator",
+	"name": "korfra/identika",
+	"description": "PHP package for validating, parsing, and generating Indonesian identity numbers efficiently",
+	"license": "MIT",
 	"keywords": [
-		"Validator",
 		"NIK",
 		"KK"
 	],
-	"license": "MIT",
 	"authors": [
 		{
 			"name": "Nur Wachid",
 			"email": "wachid@outlook.com",
 			"homepage": "https://wach.id",
 			"role": "Developer"
+		},
+		{
+			"name": "Suluh Sulistiawan",
+			"email": "suluhs@aol.com",
+			"homepage": "https://suluh.my.id",
+			"role": "Developer"
 		}
 	],
+	"scripts": {
+		"test": "./vendor/bin/phpunit tests",
+		"lint": "find src tests -name '*.php' -exec php -l {} \\;",
+		"fix": "./vendor/bin/php-cs-fixer fix",
+		"check-style": "./vendor/bin/php-cs-fixer fix --dry-run --diff",
+		"ci": [
+			"composer validate --strict",
+			"@lint",
+			"@check-style",
+			"@test",
+			"php example.php",
+			"composer audit"
+		]
+	},
 	"require": {
 		"php": "^8.4"
 	},
@@ -24,12 +43,12 @@
 	},
 	"autoload": {
 		"psr-4": {
-			"Turahe\\Validator\\": "src/"
+			"Korfra\\Identika\\": "src/"
 		}
 	},
 	"autoload-dev": {
 		"psr-4": {
-			"Turahe\\Validator\\Tests\\": "tests/"
+			"Korfra\\Identika\\Tests\\": "tests/"
 		}
 	},
 	"minimum-stability": "stable"

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator\Tests;
+namespace Korfra\Identika\Tests;
 
 /**
  * @small

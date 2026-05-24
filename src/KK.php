@@ -2,13 +2,40 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator;
+namespace Korfra\Identika;
 
 /**
  * KK (Kartu Keluarga) validator class with optimized performance.
  */
 class KK extends Base
 {
+    /**
+     * Generate a random valid KK number.
+     *
+     * @param string|null $province 2-digit province code
+     * @param string|null $city 4-digit city code (must start with province code)
+     * @param string|null $subDistrict 6-digit sub-district code (must start with city code)
+     */
+    public static function generate(
+        ?string $province = null,
+        ?string $city = null,
+        ?string $subDistrict = null,
+    ): string {
+        $prefix = $subDistrict ?? $city ?? $province;
+        $locationCode = self::getRandomLocationCode($prefix);
+
+        // KK usually has a date part representing when it was issued/created
+        // For generation, we use a random date within the last 20 years
+        $start = strtotime('-20 years');
+        $end = time();
+        $timestamp = random_int($start, $end);
+        $datePart = date('dmy', $timestamp);
+
+        $uniqueCode = str_pad((string) random_int(1, 999), 4, '0', STR_PAD_LEFT);
+
+        return $locationCode . $datePart . $uniqueCode;
+    }
+
     /**
      * Create a new KK instance with optimized type handling.
      */

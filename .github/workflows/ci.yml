@@ -166,7 +166,7 @@ jobs:
       run: |
         php -r "
         require_once 'vendor/autoload.php';
-        use Turahe\Validator\NIK;
+        use Korfra\Identika\NIK;
         \$nik = NIK::set('3273012501990001');
         \$result = \$nik->parse();
         echo 'NIK test passed\n';
@@ -176,7 +176,7 @@ jobs:
       run: |
         php -r "
         require_once 'vendor/autoload.php';
-        use Turahe\Validator\KK;
+        use Korfra\Identika\KK;
         \$kk = KK::set('3273012501990001');
         \$result = \$kk->parse();
         echo 'KK test passed\n';
@@ -186,7 +186,7 @@ jobs:
       run: |
         php -r "
         require_once 'vendor/autoload.php';
-        use Turahe\Validator\NIK;
+        use Korfra\Identika\NIK;
         try {
             NIK::set('123456789012345');
             echo 'ERROR: Should have thrown exception\n';

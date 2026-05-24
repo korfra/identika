@@ -1,8 +1,9 @@
 <?php
+
 require_once 'vendor/autoload.php';
 
-use Turahe\Validator\NIK;
-use Turahe\Validator\KK;
+use Korfra\Identika\KK;
+use Korfra\Identika\NIK;
 
 echo "=== Optimized Number Validator with PHP 8.4 Features ===\n\n";
 
@@ -11,28 +12,33 @@ function measurePerformance(callable $callback, string $name)
 {
     $start = microtime(true);
     $memoryStart = memory_get_usage();
-    
+
     $result = $callback();
-    
+
     $end = microtime(true);
     $memoryEnd = memory_get_usage();
-    
+
     $time = ($end - $start) * 1000; // Convert to milliseconds
     $memory = $memoryEnd - $memoryStart;
-    
-    echo "Timer $name: " . number_format($time, 2) . "ms, Memory: " . number_format($memory) . " bytes\n";
+
+    echo "Timer $name: ".number_format($time, 2).'ms, Memory: '.number_format($memory)." bytes\n";
+
     return $result;
 }
 
 // Example 1: NIK Validation with Performance Measurement
 echo "1. NIK Validation Performance Test:\n";
 $nik = measurePerformance(
-    function() { return NIK::set('3273012501990001'); },
+    function () {
+        return NIK::set('3273012501990001');
+    },
     'NIK Creation'
 );
 
 $result = measurePerformance(
-    function() use ($nik) { return $nik->parse(); },
+    function () use ($nik) {
+        return $nik->parse();
+    },
     'NIK Parsing'
 );
 
@@ -41,7 +47,6 @@ if ($result->valid) {
     echo "   Gender: {$result->gender}\n";
     echo "   Born: {$result->born->full}\n";
     echo "   Age: {$result->age->year} years, {$result->age->month} months, {$result->age->day} days\n";
-    echo "   Zodiac: {$result->zodiac}\n";
     echo "   Province: {$result->address->province}\n";
     echo "   City: {$result->address->city}\n";
     echo "   Sub-district: {$result->address->subDistrict}\n";
@@ -56,12 +61,16 @@ echo "\n";
 // Example 2: KK Validation with Performance Measurement
 echo "2. KK Validation Performance Test:\n";
 $kk = measurePerformance(
-    function() { return KK::set('3273012501990001'); },
+    function () {
+        return KK::set('3273012501990001');
+    },
     'KK Creation'
 );
 
 $kkResult = measurePerformance(
-    function() use ($kk) { return $kk->parse(); },
+    function () use ($kk) {
+        return $kk->parse();
+    },
     'KK Parsing'
 );
 
@@ -81,16 +90,15 @@ echo "\n";
 // Example 3: Performance Comparison - Multiple Operations
 echo "3. Performance Comparison (1000 operations):\n";
 
-measurePerformance(function() {
+measurePerformance(function () {
     for ($i = 0; $i < 1000; $i++) {
         $nik = NIK::set('3273012501990001');
         $result = $nik->parse();
         $gender = $nik->getGender();
-        $zodiac = $nik->getZodiac();
     }
 }, '1000 NIK Operations');
 
-measurePerformance(function() {
+measurePerformance(function () {
     for ($i = 0; $i < 1000; $i++) {
         $kk = KK::set('3273012501990001');
         $result = $kk->parse();
@@ -106,21 +114,21 @@ echo "4. Error Handling and Validation:\n";
 try {
     $invalidNik = NIK::set('123456789012345'); // Too short
     echo "ERROR Should have thrown exception\n";
-} catch (\InvalidArgumentException $e) {
-    echo "OK Caught exception: " . $e->getMessage() . "\n";
+} catch (InvalidArgumentException $e) {
+    echo 'OK Caught exception: '.$e->getMessage()."\n";
 }
 
 try {
     $invalidNik = NIK::set('123456789012345a'); // Non-numeric
     echo "ERROR Should have thrown exception\n";
-} catch (\InvalidArgumentException $e) {
-    echo "OK Caught exception: " . $e->getMessage() . "\n";
+} catch (InvalidArgumentException $e) {
+    echo 'OK Caught exception: '.$e->getMessage()."\n";
 }
 
 // Test validation errors
 $nik = NIK::set('1234567890123456'); // Valid format but invalid data
 $errors = $nik->getValidationErrors();
-echo "OK Validation errors: " . implode(', ', $errors) . "\n";
+echo 'OK Validation errors: '.implode(', ', $errors)."\n";
 
 echo "\n";
 
@@ -129,7 +137,7 @@ echo "5. Array Output Format:\n";
 $nik = NIK::set('3273012501990001');
 $array = $nik->toArray();
 
-echo "OK Array format: " . json_encode($array, JSON_PRETTY_PRINT) . "\n";
+echo 'OK Array format: '.json_encode($array, JSON_PRETTY_PRINT)."\n";
 
 echo "\n";
 
@@ -144,7 +152,6 @@ echo "   OK Direct string access for optimization\n";
 echo "   OK Caching for frequently accessed data\n";
 echo "   OK Improved error handling with JSON_THROW_ON_ERROR\n";
 echo "   OK Static caching for current year\n";
-echo "   OK Optimized zodiac calculation\n";
 echo "   OK Better validation with ctype_digit()\n";
 echo "   OK Memory-efficient string operations\n";
 
@@ -162,8 +169,8 @@ for ($i = 0; $i < 100; $i++) {
 $memoryAfter = memory_get_usage();
 $memoryUsed = $memoryAfter - $memoryBefore;
 
-echo "OK Memory used for 100 NIK objects: " . number_format($memoryUsed) . " bytes\n";
-echo "OK Average memory per NIK object: " . number_format($memoryUsed / 100) . " bytes\n";
+echo 'OK Memory used for 100 NIK objects: '.number_format($memoryUsed)." bytes\n";
+echo 'OK Average memory per NIK object: '.number_format($memoryUsed / 100)." bytes\n";
 
 echo "\n";
 
@@ -181,9 +188,9 @@ $time2 = microtime(true);
 $born2 = $nik->getBornDate();
 $time2 = (microtime(true) - $time2) * 1000;
 
-echo "OK First call (cache miss): " . number_format($time1, 4) . "ms\n";
-echo "OK Second call (cache hit): " . number_format($time2, 4) . "ms\n";
-echo "OK Performance improvement: " . ($time2 > 0 ? round($time1 / $time2, 1) : 'infinite') . "x faster\n";
+echo 'OK First call (cache miss): '.number_format($time1, 4)."ms\n";
+echo 'OK Second call (cache hit): '.number_format($time2, 4)."ms\n";
+echo 'OK Performance improvement: '.($time2 > 0 ? round($time1 / $time2, 1) : 'infinite')."x faster\n";
 
 echo "\n";
 
@@ -195,7 +202,7 @@ try {
     $nik2 = NIK::set(3273012501990001);    // integer
     echo "OK Both string and integer inputs work correctly\n";
 } catch (TypeError $e) {
-    echo "ERROR Type error: " . $e->getMessage() . "\n";
+    echo 'ERROR Type error: '.$e->getMessage()."\n";
 }
 
 echo "\n";
@@ -206,8 +213,8 @@ try {
     $nik = NIK::set('3273012501990001');
     $nik->number = '1234567890123456'; // This should fail
     echo "ERROR Should have thrown exception\n";
-} catch (\Error $e) {
-    echo "OK Readonly property protection works: " . $e->getMessage() . "\n";
+} catch (Error $e) {
+    echo 'OK Readonly property protection works: '.$e->getMessage()."\n";
 }
 
 echo "\n";
@@ -219,7 +226,7 @@ $nik = NIK::set('3273012501990001');
 // Direct string access vs substr performance
 $start = microtime(true);
 for ($i = 0; $i < 10000; $i++) {
-    $year = (int) ($nik->number[10] . $nik->number[11]); // Optimized
+    $year = (int) ($nik->number[10].$nik->number[11]); // Optimized
 }
 $optimizedTime = (microtime(true) - $start) * 1000;
 
@@ -229,9 +236,9 @@ for ($i = 0; $i < 10000; $i++) {
 }
 $traditionalTime = (microtime(true) - $start) * 1000;
 
-echo "OK Optimized string access: " . number_format($optimizedTime, 2) . "ms\n";
-echo "OK Traditional substr: " . number_format($traditionalTime, 2) . "ms\n";
-echo "OK Performance improvement: " . round($traditionalTime / $optimizedTime, 1) . "x faster\n";
+echo 'OK Optimized string access: '.number_format($optimizedTime, 2)."ms\n";
+echo 'OK Traditional substr: '.number_format($traditionalTime, 2)."ms\n";
+echo 'OK Performance improvement: '.round($traditionalTime / $optimizedTime, 1)."x faster\n";
 
 echo "\n";
 
@@ -240,6 +247,51 @@ echo "12. New KK Features:\n";
 $kk = KK::set('3273012501990001');
 echo "OK Raw number: {$kk->getRawNumber()}\n";
 echo "OK Formatted number: {$kk->getFormattedNumber()}\n";
-echo "OK Array format: " . json_encode($kk->toArray(), JSON_PRETTY_PRINT) . "\n";
+echo 'OK Array format: '.json_encode($kk->toArray(), JSON_PRETTY_PRINT)."\n";
+
+echo "\n";
+
+// Example 13: Random NIK and KK Generation
+echo "13. Random Generation Performance Test:\n";
+
+$generatedNik = measurePerformance(
+    function () {
+        return NIK::generate();
+    },
+    'NIK Random Generation'
+);
+echo "   Generated NIK: $generatedNik\n";
+
+$generatedKk = measurePerformance(
+    function () {
+        return KK::generate();
+    },
+    'KK Random Generation'
+);
+echo "   Generated KK: $generatedKk\n";
+
+echo "\nPerformance comparison for 1000 generations:\n";
+
+measurePerformance(function () {
+    for ($i = 0; $i < 1000; $i++) {
+        NIK::generate();
+    }
+}, '1000 NIK Generations');
+
+measurePerformance(function () {
+    for ($i = 0; $i < 1000; $i++) {
+        KK::generate();
+    }
+}, '1000 KK Generations');
+
+echo "\n";
+
+// Example 14: Localized Generation
+echo "14. Localized Generation:\n";
+$localizedNik = NIK::generate(province: '31', gender: 'PEREMPUAN');
+echo "   Generated NIK (DKI Jakarta, Female): $localizedNik\n";
+$nikObj = NIK::set($localizedNik);
+echo "   Verified Province: {$nikObj->getProvince()}\n";
+echo "   Verified Gender: {$nikObj->getGender()}\n";
 
 echo "\n=== End of Optimized Demonstration ===\n";

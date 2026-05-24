@@ -2,13 +2,55 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator;
+namespace Korfra\Identika;
 
 /**
  * NIK (Nomor Induk Kependudukan) validator class with optimized performance.
  */
 class NIK extends Base
 {
+    /**
+     * Generate a random valid NIK.
+     *
+     * @param string|null $province 2-digit province code
+     * @param string|null $city 4-digit city code (must start with province code)
+     * @param string|null $subDistrict 6-digit sub-district code (must start with city code)
+     * @param string|null $gender 'LAKI-LAKI' or 'PEREMPUAN'
+     * @param string|null $birthDate Format: 'dmy' (e.g., '250199')
+     */
+    public static function generate(
+        ?string $province = null,
+        ?string $city = null,
+        ?string $subDistrict = null,
+        ?string $gender = null,
+        ?string $birthDate = null,
+    ): string {
+        $prefix = $subDistrict ?? $city ?? $province;
+        $locationCode = self::getRandomLocationCode($prefix);
+
+        if (null === $birthDate) {
+            $start = strtotime('-70 years');
+            $end = time();
+            $timestamp = random_int($start, $end);
+            $birthDate = date('dmy', $timestamp);
+        }
+
+        $day = (int) substr($birthDate, 0, 2);
+        $month = substr($birthDate, 2, 2);
+        $year = substr($birthDate, 4, 2);
+
+        $gender ??= (random_int(0, 1) === 0 ? 'LAKI-LAKI' : 'PEREMPUAN');
+
+        if ('PEREMPUAN' === $gender) {
+            $day += 40;
+        }
+
+        $datePart = (10 <= $day ? (string) $day : "0$day") . $month . $year;
+        $uniqueCode = str_pad((string) random_int(1, 999), 4, '0', STR_PAD_LEFT);
+
+        return $locationCode . $datePart . $uniqueCode;
+    }
+
     /**
      * Create a new NIK instance with optimized type handling.
      */
@@ -48,7 +90,6 @@ class NIK extends Base
             'born' => $born,
             'age' => $this->getAge(),
             'nextBirthday' => $this->getNextBirthday(),
-            'zodiac' => $this->getZodiac(),
             'address' => $address,
             'postalCode' => $this->getPostalCode(),
             'valid' => true,
@@ -138,7 +179,6 @@ class NIK extends Base
                 'month' => $result->nextBirthday->month,
                 'day' => $result->nextBirthday->day,
             ],
-            'zodiac' => $result->zodiac,
             'address' => [
                 'province' => $result->address->province,
                 'city' => $result->address->city,

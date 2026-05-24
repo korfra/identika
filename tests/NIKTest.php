@@ -2,14 +2,16 @@
 
 declare(strict_types = 1);
 
-namespace Turahe\Validator\Tests;
+namespace Korfra\Identika\Tests;
 
+use Korfra\Identika\NIK;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Turahe\Validator\NIK;
 
 /**
  * @small
  */
+#[CoversClass(NIK::class)]
 class NIKTest extends TestCase
 {
     private const VALID_NIK = '3273012501990001';
@@ -32,21 +34,21 @@ class NIKTest extends TestCase
         $this->assertSame('3273012501990001', $nik->number);
     }
 
-    public function testValidateWithValidNIK(): void
+    public function testValidateWithValidNik(): void
     {
         $nik = NIK::set(self::VALID_NIK);
 
         $this->assertTrue($nik->validate());
     }
 
-    public function testValidateWithInvalidNIK(): void
+    public function testValidateWithInvalidNik(): void
     {
         $nik = NIK::set(self::INVALID_NIK);
 
         $this->assertFalse($nik->validate());
     }
 
-    public function testParseWithValidNIK(): void
+    public function testParseWithValidNik(): void
     {
         $nik = NIK::set(self::VALID_NIK);
         $result = $nik->parse();
@@ -59,12 +61,11 @@ class NIKTest extends TestCase
         $this->assertIsObject($result->born);
         $this->assertIsObject($result->age);
         $this->assertIsObject($result->nextBirthday);
-        $this->assertIsString($result->zodiac);
         $this->assertIsObject($result->address);
         $this->assertIsString($result->postalCode);
     }
 
-    public function testParseWithInvalidNIK(): void
+    public function testParseWithInvalidNik(): void
     {
         $nik = NIK::set(self::INVALID_NIK);
         $result = $nik->parse();
@@ -149,18 +150,6 @@ class NIKTest extends TestCase
         // Values should be non-negative
         $this->assertGreaterThanOrEqual(0, $nextBirthday->month);
         $this->assertGreaterThanOrEqual(0, $nextBirthday->day);
-    }
-
-    public function testGetZodiac(): void
-    {
-        $nik = NIK::set(self::VALID_NIK);
-        $zodiac = $nik->getZodiac();
-
-        $this->assertIsString($zodiac);
-        $this->assertNotEmpty($zodiac);
-
-        // For January 25th, should be Aquarius
-        $this->assertSame('Aquarius', $zodiac);
     }
 
     public function testGetProvince(): void
@@ -248,24 +237,50 @@ class NIKTest extends TestCase
         $this->assertIsArray($array['born']);
         $this->assertIsArray($array['age']);
         $this->assertIsArray($array['nextBirthday']);
-        $this->assertIsString($array['zodiac']);
         $this->assertIsArray($array['address']);
         $this->assertIsString($array['postalCode']);
     }
 
-    public function testInvalidNIKWithShortLength(): void
+    public function testGenerate(): void
+    {
+        $nikString = NIK::generate();
+
+        $this->assertSame(16, strlen($nikString));
+        $this->assertTrue(ctype_digit($nikString));
+
+        $nik = NIK::set($nikString);
+        $this->assertTrue($nik->validate());
+    }
+
+    public function testGenerateWithParams(): void
+    {
+        $birthDate = '170845';
+        $province = '32'; // Jawa Barat
+        $nikString = NIK::generate($province, null, null, 'PEREMPUAN', $birthDate);
+
+        $this->assertSame(16, strlen($nikString));
+        $nik = NIK::set($nikString);
+        $this->assertTrue($nik->validate());
+        $this->assertSame('PEREMPUAN', $nik->getGender());
+        $this->assertSame('17', $nik->getBornDate()->date);
+        $this->assertSame('08', $nik->getBornDate()->month);
+        $this->assertSame('1945', $nik->getBornDate()->year);
+        $this->assertSame('JAWA BARAT', $nik->getProvince());
+    }
+
+    public function testInvalidNikWithShortLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         NIK::set('123456789012345');
     }
 
-    public function testInvalidNIKWithLongLength(): void
+    public function testInvalidNikWithLongLength(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         NIK::set('12345678901234567');
     }
 
-    public function testInvalidNIKWithNonNumeric(): void
+    public function testInvalidNikWithNonNumeric(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         NIK::set('123456789012345a');

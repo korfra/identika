@@ -174,7 +174,7 @@ return (new PhpCsFixer\Config())
             'assertions' => ['assertAttributeEquals', 'assertAttributeNotEquals', 'assertEquals', 'assertNotEquals'],
         ],
         'php_unit_test_annotation' => [
-            'style' => 'annotation',
+            'style' => 'prefix',
         ],
         'php_unit_test_case_static_method_calls' => [
             'call_type' => 'this',

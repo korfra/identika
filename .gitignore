@@ -15,9 +15,6 @@ Thumbs.db
 # composer vendor dir
 /vendor
 
-# composer lock file (optional - remove if you want to track it)
-/composer.lock
-
 # composer itself is not needed
 composer.phar
 
@@ -26,8 +23,6 @@ composer.phar
 
 # phpunit itself is not needed
 phpunit.phar
-# local phpunit config
-/phpunit.xml
 # phpunit cache and results
 .phpunit.result.cache
 .phpunit.cache/
